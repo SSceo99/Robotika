@@ -84,3 +84,97 @@ int main(int argc, char** argv) {
   }
   MPI_Finalize();
 }
+
+**************************************************
+nova VErzija koda koja radi takodje 
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(NULL, NULL);
+    int world_rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    if (world_size < 2) {
+        fprintf(stderr, "World size must be greater than 1 for %s\n", argv[0]);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+    
+    srand(time(NULL) + world_rank); // Add rank to make seeds different
+    int number_to_send = rand() % 100;
+    int number_received;
+
+    if (world_rank == 0) {
+        MPI_Send(&number_to_send, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        MPI_Recv(&number_received, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    } else if (world_rank == 1) {
+        MPI_Recv(&number_received, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Send(&number_to_send, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+    }
+
+    printf("Process %d sent number %d and received %d\n", world_rank, number_to_send, number_received);
+    MPI_Finalize();
+    return 0;
+}
+************************************************************************************************************************************************** Ovde sam koristio 4 jezgra u slucaju da ih procesor ima moj ima 2 i radi posao i za dva i za vise jezgara univerzalan je kod i za vise od 4
+// Author: Wes Kendall
+// Copyright 2011 www.mpitutorial.com
+// This code is modified based on the provided MPI example.
+//
+// MPI_Send, MPI_Recv example. Each process sends a two-digit number
+// to every other process. The first digit is the rank of the process,
+// and the second digit is a random number from 0 to 9.
+
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(NULL, NULL);
+
+    int world_rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    // Ensure that we have 4 processes.
+    if (world_size != 4) {
+        fprintf(stderr, "This program is designed for 4 processes only.\n");
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+
+    time_t t;
+    srand((unsigned)time(&t) + world_rank);  // Use rank to seed for unique random numbers
+
+    int numbers[4];
+    int sent_number;
+
+    // Send number to every other process
+    for (int i = 0; i < world_size; i++) {
+        if (i != world_rank) { // Don't send to ourselves
+            sent_number = world_rank * 10 + (rand() % 10); // Two-digit number
+            MPI_Send(&sent_number, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+        }
+    }
+
+    // Receive number from every other process
+    for (int i = 0; i < world_size - 1; i++) {
+        MPI_Recv(&numbers[i], 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    // Print the received numbers
+    printf("Process %d received numbers: ", world_rank);
+    for (int i = 0; i < world_size - 1; i++) {
+        printf("%d ", numbers[i]);
+    }
+    printf("\n");
+
+    MPI_Finalize();
+
+    return 0;
+}
+
+
