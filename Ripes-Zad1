@@ -1,0 +1,30 @@
+# Initialize registers
+li t0, 2
+li t1, 4
+li t2, 5
+
+
+add s0, t0, t1
+sub s0, s0, t2
+
+
+mul t3, t1, t2   # t3 = t1 * t2
+add s1, t0, t3
+addi s1, s1, 1   # adding 1 to s1
+
+ 
+li s2, 1          # Initialize s2 to 1
+
+# Create a loop counter
+mv t3, t2
+
+loop_start:
+
+    # Multiply s2 by 2
+    add s2, s2, s2
+
+    # Decrement our counter
+    addi t3, t3, -1
+
+    # Repeat the loop if t3 is not zero
+    bnez t3, loop_start
