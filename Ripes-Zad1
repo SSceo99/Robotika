@@ -1,3 +1,4 @@
+*********************************************************************************Zadatak 1
 # Initialize registers
 li t0, 2
 li t1, 4
@@ -28,3 +29,30 @@ loop_start:
 
     # Repeat the loop if t3 is not zero
     bnez t3, loop_start
+Zadatak 2
+
+# Initialize t0 with a positive number, let's say 5 for this example
+addi t0, zero, 8  
+
+# Initialize s0 with 1, since factorial starts with multiplying 1
+addi s0, zero, 1  
+
+# Initialize a loop counter t1. This will decrement from t0 to 1
+mv t1, t0
+
+block_start:
+    # Check if t1 is zero. If yes, exit the loop
+    beq t1, zero, block_end
+    
+    # Multiply s0 by t1
+    mul s0, s0, t1  
+    
+    # Decrement t1
+    addi t1, t1, -1  
+    
+    # Repeat the loop
+    j block_start
+
+block_end:
+    # The factorial result is now in s0
+    nop
